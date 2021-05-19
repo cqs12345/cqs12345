@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd 
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd 
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd 
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd 
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd">
+
+	<!--只扫描和springmvc相关的包controller，其他包不放在这里扫-->
+	<context:component-scan base-package="com.ck.controller"/>
+
+	<!--处理springmvc中静态资源的访问问题-->
+	<mvc:default-servlet-handler/>
+	<mvc:annotation-driven/>
+
+	<!--配置模板解析器-->
+	<bean id="thymeleaf"
+		  class="org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver">
+		<!--指定前缀-->
+		<property name="prefix" value="/WEB-INF/templates/"/>
+		<!--指定后缀-->
+		<property name="suffix" value=".html"/>
+		<!--指定基于哪个模板，这里指定为H5-->
+		<property name="templateMode" value="HTML5"/>
+		<!--指定编码格式给utf-8-->
+		<property name="characterEncoding" value="UTF-8"/>
+	</bean>
+
+	<!--配置thymeleaf的模板引擎，解析thymeleaf中的特殊属性(?)-->
+	<bean id="engine" class="org.thymeleaf.spring3.SpringTemplateEngine">
+		<!--注入模板解析器-->
+		<property name="templateResolver" ref="thymeleaf"/>
+	</bean>
+
+	<!--配置thymeleaf的视图解析器-->
+	<bean class="org.thymeleaf.spring3.view.ThymeleafViewResolver">
+		<!--注入模板引擎-->
+		<property name="templateEngine" ref="engine"/>
+		<!--指定编码格式给utf-8-->
+		<property name="characterEncoding" value="UTF-8"/>
+	</bean>
+
+	<!--引入email.properties-->
+	<context:property-placeholder location="classpath:email.properties"/>
+
+	<!--配置springmvc发送电子邮件的发送者对象-JavaMailSenderImpl-->
+	<bean class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<!--1 指定电子邮件的类型(主机号)-->
+		<!--qq邮箱：smtp.qq.com-->
+		<!--163邮箱：smtp.163.com-->
+		<property name="host" value="${email_host}"/>
+		<!--2 指定发送电子邮件的相关信息-->
+		<property name="javaMailProperties">
+			<!--props注入多个键值对-->
+			<props>
+				<!--prop指定每个键值对-->
+				<!--mail.smtp.auth指定是否需要身份验证-->
+				<prop key="mail.smtp.auth">${mail_smtp_auth}</prop>
+				<!--指定发送的超时时间,时间单位为毫秒-->
+				<prop key="mail.smtp.timeout">${mail_smtp_timeout}</prop>
+			</props>
+		</property>
+		<!--3 指定电子邮件发送者(发件人)，这里写你的电子邮件，以后写公司的共用电子邮件-->
+		<property name="username" value="${mail_from}"/>
+		<!--4、电子邮件的授权码(没有授权码在程序中不可用)，这个授权码在这里称之为密码-->
+		<property name="password" value="${mail_password}"/>
+		<!--5、指定字符编码-->
+		<property name="defaultEncoding" value="UTF-8"/>
+	</bean>
+
+
+
+</beans>
